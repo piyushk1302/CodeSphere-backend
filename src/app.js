@@ -2,29 +2,46 @@ const express = require("express");
 
 const app = express();
 
-// app.get("/ab?c", (req, res) => {
+const {adminAuth,userAuth} = require("./middlewares/auth")
+
+//handle auth middleware for all http methods
+app.use("/admin", adminAuth);
+
+app.get("/admin/getData", (req, res) => {
+  res.send("Data sent successfully");
+});
+
+app.get("/user",userAuth,(req,res)=>{
+  res.send("user data sent")
+})
+
+// app.get("/ab?c", (req, res) =>{
 //   res.send({
 //     fname: "Piyush Kumar",
 //     lname: "Singh",
 //   });
 // });
 
-app.use("/user",[(req,res,next)=>{
-  console.log("Handling the router 1");
-  // res.send("Router 1 handled successfully");
-  next();
-  res.send("Router 1 handled successfully");
-},(req,res,next)=>{
-  console.log("hello");
-  
-  //res.send("Router 2 handled success")
-  next()
-},(req,res,next)=>{
-  console.log("hello 3");
-  
-  res.send("Router 3 handled success")
-  next()
-}])
+app.use("/user", [
+  (req, res, next) => {
+    console.log("Handling the router 1");
+    // res.send("Router 1 handled successfully");
+    next();
+    res.send("Router 1 handled successfully");
+  },
+  (req, res, next) => {
+    console.log("hello");
+
+    //res.send("Router 2 handled success")
+    next();
+  },
+  (req, res, next) => {
+    console.log("hello 3");
+
+    res.send("Router 3 handled success");
+    next();
+  },
+]);
 
 //ab*d-anything in place of *
 
