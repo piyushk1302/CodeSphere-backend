@@ -4,6 +4,22 @@ const app = express();
 
 const {adminAuth,userAuth} = require("./middlewares/auth")
 
+app.get("/getUserData",(req,res)=>{
+  try{
+    throw new Error("vfdhbnbj");
+  res.send("success")
+  }
+  catch{
+    res.status(500).send("error try again")
+  }
+})
+// always write it in the end
+app.use("/",(err,req,res,next)=>{
+  if(err){
+    req.status(500).send("Something went wrong")
+  }
+})
+
 //handle auth middleware for all http methods
 app.use("/admin", adminAuth);
 
