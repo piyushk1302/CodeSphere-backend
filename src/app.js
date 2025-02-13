@@ -7,6 +7,13 @@ app.use(express.json());
 app.post("/signUp", async (req, res) => {
   console.log(req.body);
 
+  const { firstName, emailId, password } = req.body;
+
+  // API-Level Validation (Checking required fields)
+  if (!firstName || !emailId || !password) {
+    return res.status(400).json({ error: "All fields are required!" });
+  }
+
   // const userObj = {
   //   firstName: "Ayush",
   //   lastName: "singh",
@@ -21,7 +28,7 @@ app.post("/signUp", async (req, res) => {
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("error:"+ err.message);
+    res.status(400).send("error:" + err.message);
   }
 });
 
@@ -58,19 +65,38 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body._id;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?._id;
   const data = req.body;
   try {
+    console.log(userId);
+    console.log(data);
+
+    const ALLOWED_UPDATES = [ "age","skills","gender", "photoUrl"];
+    const isAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
+
+    // if (!isAllowed) {
+    //   throw new Error("Update failed");
+    // }
+
+    if (!isAllowed) {
+      throw new Error("error occured")
+    }
+
+    if(data?.skills?.length() > 5){
+      throw new Error("no skills will be added more")
+    }
+
     console.log("Received userId:", userId);
     console.log("recieved data", data);
 
-  // if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
-  //     return res.status(400).json({ error: "Invalid or missing user ID" });
-  //   }  
+    // if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+    //     return res.status(400).json({ error: "Invalid or missing user ID" });
+    //   }
 
-    const user = await User.findByIdAndUpdate(userId, data,{
+    const user = await User.findByIdAndUpdate(userId, data, {
       new: true,
+      // returnDocument: "before",
       runValidators: true,
     });
     console.log(user);
@@ -78,7 +104,9 @@ app.patch("/user", async (req, res) => {
     // const user = await User.findByIdAndDelete(userId);
     res.send("User updated database");
   } catch (err) {
-    res.status(400).send("error!!!");
+    console.log(err.message);
+    
+    res.status(400).send("error!!!"+err.message);
   }
 });
 
