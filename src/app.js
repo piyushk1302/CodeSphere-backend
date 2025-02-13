@@ -1,34 +1,76 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user.js");
+const { validateSignUpData } = require("./utils/validation.js");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
+
 const app = express();
 app.use(express.json());
 
 app.post("/signUp", async (req, res) => {
   console.log(req.body);
-
-  const { firstName, emailId, password } = req.body;
-
-  // API-Level Validation (Checking required fields)
-  if (!firstName || !emailId || !password) {
-    return res.status(400).json({ error: "All fields are required!" });
-  }
-
-  // const userObj = {
-  //   firstName: "Ayush",
-  //   lastName: "singh",
-  //   emailId: "ak@gmail.com",
-  //   password: "jhrdgvhgfbhj",
-  // };
-
-  const user = new User(req.body);
-  // //creating a new instance of the user model
-  // const user = new User(userObj);
   try {
+    //validate user data
+    validateSignUpData(req);
+    // const { firstName, emailId, password } = req.body;
+
+    const { firstName, lastName, emailId, password } = req.body;
+    //encrypt password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // API-Level Validation (Checking required fields)
+    // if (!firstName || !emailId || !password) {
+    //   return res.status(400).json({ error: "All fields are required!" });
+    // }
+
+    // const userObj = {
+    //   firstName: "Ayush",
+    //   lastName: "singh",
+    //   emailId: "ak@gmail.com",
+    //   password: "jhrdgvhgfbhj",
+    // };
+
+    // const user = new User(req.body);
+    // //creating a new instance of the user model
+    // const user = new User(userObj);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("error:" + err.message);
+    res.status(400).send("ERROR:" + err.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Not a valid email,please check once");
+    }
+
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      res.send("Login successfully!!!");
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR!!! :- " + err.message);
   }
 });
 
@@ -72,19 +114,21 @@ app.patch("/user/:userId", async (req, res) => {
     console.log(userId);
     console.log(data);
 
-    const ALLOWED_UPDATES = [ "age","skills","gender", "photoUrl"];
-    const isAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
+    const ALLOWED_UPDATES = ["age", "skills", "gender", "photoUrl"];
+    const isAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
 
     // if (!isAllowed) {
     //   throw new Error("Update failed");
     // }
 
     if (!isAllowed) {
-      throw new Error("error occured")
+      throw new Error("error occured");
     }
 
-    if(data?.skills?.length() > 5){
-      throw new Error("no skills will be added more")
+    if (data?.skills?.length() > 5) {
+      throw new Error("no skills will be added more");
     }
 
     console.log("Received userId:", userId);
@@ -105,8 +149,8 @@ app.patch("/user/:userId", async (req, res) => {
     res.send("User updated database");
   } catch (err) {
     console.log(err.message);
-    
-    res.status(400).send("error!!!"+err.message);
+
+    res.status(400).send("error!!!" + err.message);
   }
 });
 

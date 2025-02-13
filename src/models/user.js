@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
   },
   photoUrl :{
     type: String,
-    default: "fbdbvdvdbv/gig.com",
+    default: "www.google.com",
     validate(value){
         if(!validator.isURL(value)){
             throw new Error("Not a valid URL,please check")
