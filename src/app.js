@@ -21,7 +21,7 @@ app.post("/signUp", async (req, res) => {
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("error:", err.message);
+    res.status(400).send("error:"+ err.message);
   }
 });
 
@@ -29,7 +29,8 @@ app.post("/signUp", async (req, res) => {
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
   try {
-    const user = await User.find({ emailId: userEmail });
+    // const user = await User.findOne({ emailId: userEmail });
+    const user = await User.findOne({});
     res.send(user);
   } catch (err) {
     res.status(400).send("error occured");
@@ -37,16 +38,49 @@ app.get("/user", async (req, res) => {
 });
 
 //feed api-get all the users from the databse
-app.get("/feed",async(req,res)=>{
-  try{
-    const users=await User.find({});
-    res.send(users)
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    res.status(500).send("error!!!");
   }
-  catch(err){
-    res.status(500).send("error!!!")
-  }
-})
+});
 
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete({ _id: userId });
+    // const user = await User.findByIdAndDelete(userId);
+    res.send("User deleted from database");
+  } catch (err) {
+    res.status(400).send("error!!!");
+  }
+});
+
+app.patch("/user", async (req, res) => {
+  const userId = req.body._id;
+  const data = req.body;
+  try {
+    console.log("Received userId:", userId);
+    console.log("recieved data", data);
+
+  // if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+  //     return res.status(400).json({ error: "Invalid or missing user ID" });
+  //   }  
+
+    const user = await User.findByIdAndUpdate(userId, data,{
+      new: true,
+      runValidators: true,
+    });
+    console.log(user);
+
+    // const user = await User.findByIdAndDelete(userId);
+    res.send("User updated database");
+  } catch (err) {
+    res.status(400).send("error!!!");
+  }
+});
 
 // const {adminAuth,userAuth} = require("./middlewares/auth")
 
