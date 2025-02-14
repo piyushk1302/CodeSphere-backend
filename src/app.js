@@ -74,7 +74,7 @@ app.post("/login", async (req, res) => {
       const token = await user.getJWT();
       console.log(token);
 
-      res.cookie("token", token);
+      res.cookie("token", token, { expires: new Date(Date.now() + 60000000) });
       res.send("Login successfully!!!");
     } else {
       throw new Error("Invalid credentials");
