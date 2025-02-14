@@ -6,7 +6,12 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 
 const app = express();
+const cookiesParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth.js");
+
 app.use(express.json());
+app.use(cookiesParser());
 
 app.post("/signUp", async (req, res) => {
   console.log(req.body);
@@ -62,9 +67,14 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
+      //create a token
+      const token = await user.getJWT();
+      console.log(token);
+
+      res.cookie("token", token);
       res.send("Login successfully!!!");
     } else {
       throw new Error("Invalid credentials");
@@ -74,85 +84,113 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//first we will feed data for a single user
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    // const user = await User.findOne({ emailId: userEmail });
-    const user = await User.findOne({});
+    const user = req.user;
+
+    // console.log(cookies);
     res.send(user);
   } catch (err) {
-    res.status(400).send("error occured");
+    res.status(400).send("ERROR:- " + err.message);
   }
 });
 
-//feed api-get all the users from the databse
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send(users);
-  } catch (err) {
-    res.status(500).send("error!!!");
-  }
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  const user = req.user;
+
+  // sending connection request
+  console.log("Sending connection request");
+
+  res.send(user.firstName + " sent the connection request");
 });
 
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const user = await User.findByIdAndDelete({ _id: userId });
-    // const user = await User.findByIdAndDelete(userId);
-    res.send("User deleted from database");
-  } catch (err) {
-    res.status(400).send("error!!!");
-  }
-});
+// if (learning_random_api) {
+//   //first we will feed data for a single user
+//   app.get("/user", async (req, res) => {
+//     const userEmail = req.body.emailId;
+//     try {
+//       // const user = await User.findOne({ emailId: userEmail });
+//       const user = await User.findOne({});
+//       res.send(user);
+//     } catch (err) {
+//       res.status(400).send("error occured");
+//     }
+//   });
 
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?._id;
-  const data = req.body;
-  try {
-    console.log(userId);
-    console.log(data);
+//   //feed api-get all the users from the databse
+//   app.get("/feed", async (req, res) => {
+//     try {
+//       const users = await User.find({});
+//       res.send(users);
+//     } catch (err) {
+//       res.status(500).send("error!!!");
+//     }
+//   });
 
-    const ALLOWED_UPDATES = ["age", "skills", "gender", "photoUrl"];
-    const isAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
+//   app.delete("/user", async (req, res) => {
+//     const userId = req.body.userId;
+//     try {
+//       const user = await User.findByIdAndDelete({ _id: userId });
+//       // const user = await User.findByIdAndDelete(userId);
+//       res.send("User deleted from database");
+//     } catch (err) {
+//       res.status(400).send("error!!!");
+//     }
+//   });
 
-    // if (!isAllowed) {
-    //   throw new Error("Update failed");
-    // }
+//   app.patch("/user/:userId", async (req, res) => {
+//     const userId = req.params?.userId;
+//     const data = req.body;
+//     try {
+//       console.log(userId);
+//       console.log(data);
 
-    if (!isAllowed) {
-      throw new Error("error occured");
-    }
+//       const ALLOWED_UPDATES = [
+//         "lastName",
+//         "age",
+//         "skills",
+//         "gender",
+//         "photoUrl",
+//       ];
+//       const isAllowed = Object.keys(data).every((k) =>
+//         ALLOWED_UPDATES.includes(k)
+//       );
 
-    if (data?.skills?.length() > 5) {
-      throw new Error("no skills will be added more");
-    }
+//       // if (!isAllowed) {
+//       //   throw new Error("Update failed");
+//       // }
 
-    console.log("Received userId:", userId);
-    console.log("recieved data", data);
+//       if (!isAllowed) {
+//         throw new Error("error occured");
+//       }
 
-    // if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
-    //     return res.status(400).json({ error: "Invalid or missing user ID" });
-    //   }
+//       if (data?.skills?.length() > 5) {
+//         throw new Error("no skills will be added more");
+//       }
 
-    const user = await User.findByIdAndUpdate(userId, data, {
-      new: true,
-      // returnDocument: "before",
-      runValidators: true,
-    });
-    console.log(user);
+//       console.log("Received userId:", userId);
+//       console.log("recieved data", data);
 
-    // const user = await User.findByIdAndDelete(userId);
-    res.send("User updated database");
-  } catch (err) {
-    console.log(err.message);
+//       // if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+//       //     return res.status(400).json({ error: "Invalid or missing user ID" });
+//       //   }
 
-    res.status(400).send("error!!!" + err.message);
-  }
-});
+//       const user = await User.findByIdAndUpdate(userId, data, {
+//         new: true,
+//         // returnDocument: "before",
+//         runValidators: true,
+//       });
+//       console.log(user);
+
+//       // const user = await User.findByIdAndDelete(userId);
+//       res.send("User updated database");
+//     } catch (err) {
+//       console.log(err.message);
+
+//       res.status(400).send("error!!!" + err.message);
+//     }
+//   });
+// }
 
 // const {adminAuth,userAuth} = require("./middlewares/auth")
 
