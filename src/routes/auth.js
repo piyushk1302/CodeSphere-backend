@@ -20,21 +20,9 @@ authRouter.post("/signUp", async (req, res) => {
       //encrypt password
       const passwordHash = await bcrypt.hash(password, 10);
   
-      // API-Level Validation (Checking required fields)
-      // if (!firstName || !emailId || !password) {
-      //   return res.status(400).json({ error: "All fields are required!" });
-      // }
+   
+   
   
-      // const userObj = {
-      //   firstName: "Ayush",
-      //   lastName: "singh",
-      //   emailId: "ak@gmail.com",
-      //   password: "jhrdgvhgfbhj",
-      // };
-  
-      // const user = new User(req.body);
-      // //creating a new instance of the user model
-      // const user = new User(userObj);
   
       const user = new User({
         firstName,
@@ -74,7 +62,7 @@ authRouter.post("/login", async (req, res) => {
         }
   
         res.cookie("token", token, { expires: new Date(Date.now() + 60000000) });
-        res.send("Login successfully!!!");
+        res.send(user);
       } else {
         throw new Error("Invalid credentials");
       }

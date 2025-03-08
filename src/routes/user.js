@@ -69,17 +69,15 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       .forEach((req) => {
         hiddenFromFeed.add(req.fromUserId), hiddenFromFeed.add(req.toUserId);
       })
-      .select("fromUserId toUserId");
+      // .select("fromUserId toUserId");
 
-    const users = await User.find({
-      $and: [
-        { _id: { $nin: Array.from(hiddenFromFeed) } },
-        { _id: { $ne: loggedInUser._id } },
-      ],
-    })
-      .select("firstName lastName")
-      .skip(skip)
-      .limit(limit);
+      const users = await User.find({
+        $and: [
+          { _id: { $nin: Array.from(hiddenFromFeed) } },
+          { _id: { $ne: loggedInUser._id } },
+        ],
+      }).select("firstName lastName").skip(skip).limit(limit)
+      
 
     res.json({
       users,
