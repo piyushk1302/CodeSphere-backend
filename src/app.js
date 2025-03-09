@@ -3,31 +3,31 @@ const connectDB = require("./config/database");
 // const validator = require("validator");
 // already used in utils and middlewares
 const app = express();
-const cors = require("cors")
+const cors = require("cors");
 
 const cookiesParser = require("cookie-parser");
 // const jwt = require("jsonwebtoken");
 
-app.use(cors({
-  origin: "http://urban-lamp-766rj557pg42px4g-5173.app.github.dev",
-  credentials: true,
-  
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5175",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookiesParser());
 
-const authRouter = require("./routes/auth.js")
-const profileRouter = require("./routes/profile.js")
-const requestRouter = require("./routes/request.js")
-const userRouter = require("./routes/user.js")
+const authRouter = require("./routes/auth.js");
+const profileRouter = require("./routes/profile.js");
+const requestRouter = require("./routes/request.js");
+const userRouter = require("./routes/user.js");
 
-app.use("/",authRouter)
-app.use("/",profileRouter)
-app.use("/",requestRouter)
-app.use("/",userRouter)
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
-
-
+//app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 connectDB()
   .then(() => {
