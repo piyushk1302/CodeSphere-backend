@@ -1,8 +1,6 @@
 const express = require("express");
-
 const validator = require("validator");
 const bcrypt = require("bcrypt")
-
 const profileRouter = express.Router();
 const { userAuth } = require("../middlewares/auth.js");
 const { validateEditProfile } = require("../utils/validation.js");
@@ -11,8 +9,6 @@ const jwt = require("jsonwebtoken");
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-
-    // console.log(cookies);
     res.send(user);
   } catch (err) {
     res.status(400).send("ERROR:- " + err.message);
