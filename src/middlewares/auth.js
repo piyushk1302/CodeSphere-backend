@@ -24,20 +24,6 @@ const userAuth = async (req, res, next) => {
   }
 };
 
-// const userAuth = (req, res, next) => {
-//   console.log("User auth is getting checked");
-//   const token = "sdf";
-//   const isAuthorized = token === "sdfbhbh";
-//   if (!isAuthorized) {
-//     res.status(401).send("The user is not authorized");
-//   } else {
-//     next();
-//   }
-// };
-
-
-
-
 module.exports = {
   userAuth,
 };
