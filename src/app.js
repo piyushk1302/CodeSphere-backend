@@ -1,12 +1,9 @@
 const express = require("express");
 const connectDB = require("./config/database");
-// const validator = require("validator");
-// already used in utils and middlewares
-const app = express();
 const cors = require("cors");
-
 const cookiesParser = require("cookie-parser");
-// const jwt = require("jsonwebtoken");
+
+const app = express();
 
 app.use(
   cors({
@@ -26,8 +23,6 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
-
-//app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 connectDB()
   .then(() => {

@@ -14,7 +14,8 @@ const {firstName,lastName,emailId,password} = req.body;
     }
 }
 const validateEditProfile=async function (req){
-    const ALLOWED_UPDATES = ["firstName","lastName","emailId","skills"];
+    try
+    {const ALLOWED_UPDATES = ["firstName","lastName","emailId","skills"];
 
     const isAllowed = Object.keys(req.body).every(k=>ALLOWED_UPDATES.includes(k));
     if(!isAllowed){
@@ -25,7 +26,11 @@ const validateEditProfile=async function (req){
     }
     console.log("Updating the database...");
     
-    return true;
+    return true;}
+    catch(err){
+        console.error(err);
+        
+    }
 }
 
 module.exports={
