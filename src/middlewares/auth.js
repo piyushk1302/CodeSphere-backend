@@ -1,14 +1,3 @@
-// const adminAuth = (req, res, next) => {
-//   console.log("admin auth is getting checked");
-//   const token = "sdf";
-//   const isAuthorized = token === "sdf";
-//   if (!isAuthorized) {
-//     res.status(401).send("The user is not authorized");
-//   } else {
-//     next();
-//   }
-// };
-
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.js");
 
